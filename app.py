@@ -3,26 +3,22 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 from clustering import run_kmeans, evaluate_clusters
-from visualization import pca_plot
-
+from visualisasi import pca_plot
 
 st.set_page_config(page_title="Iris Clustering SPK", page_icon="🌸", layout="wide")
 
 st.title("Sistem Pendukung Keputusan – Iris Clustering")
-st.write("Versi simpel & estetik dengan 4 file saja.")
+st.write("Versi simpel & estetik dengan.")
 
 uploaded_file = st.file_uploader("Upload Dataset Iris (CSV)", type=["csv"])
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
     st.success("Dataset berhasil di-upload!")
-
     st.write("### Preview Dataset")
     st.dataframe(df.head(), use_container_width=True)
-
     st.markdown("---")
 
-    # PARAMETER
     k = st.slider("Jumlah cluster (k)", 2, 10, 3)
     do_scale = st.checkbox("Gunakan StandardScaler", value=True)
 
@@ -39,19 +35,16 @@ if uploaded_file:
         df["cluster"] = labels
 
         st.success("Clustering selesai!")
-        st.dataframe(df)
+        st.dataframe(df, use_container_width=True)
 
-        # Evaluasi
         sil, ch, db = evaluate_clusters(X_scaled, labels)
 
-        st.markdown("Evaluasi Model")
+        st.markdown("## Evaluasi Model")
         st.write(f"**Silhouette Score:** {sil:.4f}")
         st.write(f"**Calinski-Harabasz:** {ch:.2f}")
         st.write(f"**Davies-Bouldin:** {db:.4f}")
 
         st.markdown("---")
-
-        # Visualisasi
-        st.markdown("Visualisasi Klaster (PCA)")
+        st.markdown("## Visualisasi Klaster (PCA)")
         fig = pca_plot(X_scaled, labels)
         st.pyplot(fig)

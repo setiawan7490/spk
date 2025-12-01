@@ -5,12 +5,10 @@ from sklearn.metrics import (
     davies_bouldin_score
 )
 
-
 def run_kmeans(X_scaled, k):
-    model = KMeans(n_clusters=k, random_state=42)
+    model = KMeans(n_clusters=k, random_state=42, n_init=10)
     labels = model.fit_predict(X_scaled)
     return labels
-
 
 def evaluate_clusters(X_scaled, labels):
     sil = silhouette_score(X_scaled, labels)
