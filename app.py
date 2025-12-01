@@ -8,7 +8,7 @@ from visualisasi import pca_plot
 st.set_page_config(page_title="Iris Clustering SPK", page_icon="🌸", layout="wide")
 
 st.title("Sistem Pendukung Keputusan – Iris Clustering")
-st.write("Versi simpel & estetik dengan.")
+st.write("Versi simpel & estetik.")
 
 uploaded_file = st.file_uploader("Upload Dataset Iris (CSV)", type=["csv"])
 
