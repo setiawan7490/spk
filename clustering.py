@@ -1,17 +1,21 @@
 from sklearn.cluster import KMeans
-from sklearn.metrics import (
-    silhouette_score,
-    calinski_harabasz_score,
-    davies_bouldin_score
-)
+from sklearn.metrics import silhouette_score, adjusted_rand_score
+from sklearn.decomposition import PCA
 
-def run_kmeans(X_scaled, k):
-    model = KMeans(n_clusters=k, random_state=42, n_init=10)
-    labels = model.fit_predict(X_scaled)
-    return labels
+def perform_clustering(df, k):
+    X = df.iloc[:, :4]
 
-def evaluate_clusters(X_scaled, labels):
-    sil = silhouette_score(X_scaled, labels)
-    ch = calinski_harabasz_score(X_scaled, labels)
-    db = davies_bouldin_score(X_scaled, labels)
-    return sil, ch, db
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_result = kmeans.fit_predict(X)
+
+    silhouette = silhouette_score(X, cluster_result)
+    ari = adjusted_rand_score(df["Label_Asli"], cluster_result)
+
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(X)
+
+    df["Cluster"] = cluster_result
+    df["PCA1"] = pca_result[:, 0]
+    df["PCA2"] = pca_result[:, 1]
+
+    return df, silhouette, ari

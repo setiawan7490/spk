@@ -1,50 +1,64 @@
 import streamlit as st
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
-from clustering import run_kmeans, evaluate_clusters
-from visualisasi import pca_plot
+from data_loader import load_data
+from clustering import perform_clustering
 
-st.set_page_config(page_title="Iris Clustering SPK", page_icon="🌸", layout="wide")
+# Judul Aplikasi
+st.set_page_config(page_title="Clustering Iris", layout="centered")
+st.title("Perbandingan Clustering K-Means dan Label Asli Iris")
 
-st.title("Sistem Pendukung Keputusan – Iris Clustering")
-st.write("Versi simpel & estetik.")
+# Load Dataset
+df, target_names = load_data()
+st.subheader("Dataset Iris")
+st.dataframe(df)
 
-uploaded_file = st.file_uploader("Upload Dataset Iris (CSV)", type=["csv"])
+# Input Jumlah Cluster
+k = st.slider("Pilih Jumlah Cluster (K)", 2, 6, 3)
 
-if uploaded_file:
-    df = pd.read_csv(uploaded_file)
-    st.success("Dataset berhasil di-upload!")
-    st.write("### Preview Dataset")
-    st.dataframe(df.head(), use_container_width=True)
-    st.markdown("---")
+# Proses Clustering
+df, silhouette, ari = perform_clustering(df, k)
 
-    k = st.slider("Jumlah cluster (k)", 2, 10, 3)
-    do_scale = st.checkbox("Gunakan StandardScaler", value=True)
+# Evaluasi
+st.subheader("Evaluasi")
+st.write(f"Silhouette Score: {silhouette:.3f}")
+st.write(f"Adjusted Rand Index (ARI): {ari:.3f}")
 
-    if st.button("Jalankan Clustering"):
-        X = df.iloc[:, :-1]
+# Visualisasi Clustering
+st.subheader("Hasil Clustering")
 
-        if do_scale:
-            scaler = StandardScaler()
-            X_scaled = scaler.fit_transform(X)
-        else:
-            X_scaled = X.values
+fig1, ax1 = plt.subplots()
+ax1.scatter(df["PCA1"], df["PCA2"], c=df["Cluster"])
+ax1.set_xlabel("PCA 1")
+ax1.set_ylabel("PCA 2")
+ax1.set_title("Clustering K-Means")
+st.pyplot(fig1)
 
-        labels = run_kmeans(X_scaled, k)
-        df["cluster"] = labels
+# Visualisasi Label Asli
+st.subheader("Label Asli")
 
-        st.success("Clustering selesai!")
-        st.dataframe(df, use_container_width=True)
+fig2, ax2 = plt.subplots()
+ax2.scatter(df["PCA1"], df["PCA2"], c=df["Label_Asli"])
+ax2.set_xlabel("PCA 1")
+ax2.set_ylabel("PCA 2")
+ax2.set_title("Label Asli Iris")
+st.pyplot(fig2)
 
-        sil, ch, db = evaluate_clusters(X_scaled, labels)
+# Tabel Perbandingan
+st.subheader("Perbandingan Data")
+st.dataframe(df[[
+    "sepal length (cm)",
+    "sepal width (cm)",
+    "petal length (cm)",
+    "petal width (cm)",
+    "Label_Asli",
+    "Cluster"
+]])
 
-        st.markdown("## Evaluasi Model")
-        st.write(f"**Silhouette Score:** {sil:.4f}")
-        st.write(f"**Calinski-Harabasz:** {ch:.2f}")
-        st.write(f"**Davies-Bouldin:** {db:.4f}")
-
-        st.markdown("---")
-        st.markdown("## Visualisasi Klaster (PCA)")
-        fig = pca_plot(X_scaled, labels)
-        st.pyplot(fig)
+# Kesimpulan
+st.subheader("Kesimpulan")
+st.write(
+    "Clustering mengelompokkan data berdasarkan kemiripan fitur, "
+    "sedangkan label asli merupakan pengelompokan biologis. "
+    "Nilai ARI menunjukkan tingkat kesesuaian hasil clustering."
+)
